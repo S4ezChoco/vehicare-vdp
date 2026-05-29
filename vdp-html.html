@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VDP OBD-II — Technical Documentation</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F8F7F4;
+    --surface: #FFFFFF;
+    --border: #E2DDD6;
+    --border-strong: #C8C0B5;
+    --text-primary: #1A1814;
+    --text-secondary: #5C5650;
+    --text-muted: #8C867E;
+    --accent: #1B4F8A;
+    --accent-light: #E8EFF8;
+    --accent-mid: #2E6BB0;
+    --highlight: #2D5A3D;
+    --highlight-light: #EAF2ED;
+    --warning: #7A4F00;
+    --warning-light: #FFF8E6;
+    --font-serif: 'Source Serif 4', Georgia, serif;
+    --font-sans: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* SIDEBAR NAV */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 100;
+    padding: 0 0 40px 0;
+  }
+
+  .sidebar-brand {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+
+  .sidebar-brand-title {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .sidebar-brand-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .nav-section {
+    padding: 8px 20px 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+
+  .nav-item {
+    display: block;
+    padding: 6px 20px 6px 20px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .nav-item:hover, .nav-item.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .nav-item span.num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-right: 6px;
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    margin-left: 260px;
+    min-height: 100vh;
+  }
+
+  /* COVER PAGE */
+  .cover {
+    background: var(--accent);
+    color: white;
+    padding: 80px 80px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+
+  .cover::after {
+    content: '';
+    position: absolute;
+    right: 80px; bottom: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .cover-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 4px 12px;
+    margin-bottom: 28px;
+  }
+
+  .cover h1 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 42px;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+
+  .cover h2 {
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 18px;
+    opacity: 0.75;
+    margin-bottom: 40px;
+  }
+
+  .cover-meta {
+    display: flex;
+    gap: 48px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .cover-meta-item label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    margin-bottom: 4px;
+  }
+
+  .cover-meta-item span {
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  /* CONTENT SECTIONS */
+  .content {
+    padding: 56px 80px;
+    max-width: 1100px;
+  }
+
+  .section {
+    margin-bottom: 72px;
+    scroll-margin-top: 40px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 8px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+    min-width: 32px;
+  }
+
+  .section-title {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--text-primary);
+  }
+
+  .section-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    line-height: 1.6;
+    max-width: 720px;
+  }
+
+  /* DIAGRAM CARD */
+  .diagram-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+
+  .diagram-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: #F2F0EC;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .diagram-card-title {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .diagram-card-type {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    background: var(--border);
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+
+  .diagram-body {
+    padding: 32px 20px;
+    overflow-x: auto;
+    min-height: 120px;
+  }
+
+  .diagram-body .mermaid {
+    display: flex;
+    justify-content: center;
+  }
+
+  .diagram-caption {
+    padding: 12px 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    font-style: italic;
+  }
+
+  /* TABLES */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  th {
+    background: var(--accent);
+    color: white;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+  }
+
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td { background: #FAFAF8; }
+
+  td code {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    background: var(--border);
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+
+  /* CALLOUT BOXES */
+  .callout {
+    border-left: 3px solid;
+    padding: 12px 18px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+
+  .callout-info { border-color: var(--accent); background: var(--accent-light); }
+  .callout-success { border-color: var(--highlight); background: var(--highlight-light); }
+  .callout-warning { border-color: var(--warning); background: var(--warning-light); }
+
+  .callout strong { display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* TOC */
+  .toc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .toc-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    transition: all 0.15s;
+  }
+
+  .toc-item:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .toc-num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    min-width: 24px;
+  }
+
+  /* PRINT */
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .cover { break-after: page; }
+    .section { break-inside: avoid; }
+  }
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-title">VDP OBD-II - "VehiCare"</div>
+    <div class="sidebar-brand-sub">Technical Documentation</div>
+  </div>
+  <div class="nav-section">Overview</div>
+  <a class="nav-item" href="#overview"><span class="num">§0</span> Project Overview</a>
+  <div class="nav-section">Architecture</div>
+  <a class="nav-item" href="#s1"><span class="num">01</span> System Architecture</a>
+  <a class="nav-item" href="#s12"><span class="num">12</span> Component Diagram</a>
+  <a class="nav-item" href="#s13"><span class="num">13</span> Deployment Diagram</a>
+  <div class="nav-section">Data Flow</div>
+  <a class="nav-item" href="#s2"><span class="num">02</span> Level 0 DFD</a>
+  <a class="nav-item" href="#s3"><span class="num">03</span> Level 1 DFD</a>
+  <a class="nav-item" href="#s4"><span class="num">04</span> Level 2 DFD — OBD-II</a>
+  <div class="nav-section">Data Model</div>
+  <a class="nav-item" href="#s5"><span class="num">05</span> Entity Relationship Diagram</a>
+  <div class="nav-section">Sequence Diagrams</div>
+  <a class="nav-item" href="#s6"><span class="num">06</span> OBD-II Connection & Poll</a>
+  <a class="nav-item" href="#s7"><span class="num">07</span> AI Diagnostics Chat</a>
+  <a class="nav-item" href="#s8"><span class="num">08</span> User Login / IP Protection</a>
+  <div class="nav-section">Activity Diagrams</div>
+  <a class="nav-item" href="#s9"><span class="num">09</span> Arduino Data Processing</a>
+  <a class="nav-item" href="#s10"><span class="num">10</span> VIN Decode & Registration</a>
+  <div class="nav-section">Use Case</div>
+  <a class="nav-item" href="#s11"><span class="num">11</span> Use Case Diagram</a>
+  <div class="nav-section">Flowcharts</div>
+  <a class="nav-item" href="#s14"><span class="num">14</span> OBD-II Polling Cycle</a>
+  <a class="nav-item" href="#s15"><span class="num">15</span> DTC Read/Clear Process</a>
+  <a class="nav-item" href="#s16"><span class="num">16</span> Sensor Data Pipeline</a>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- COVER -->
+  <div class="cover">
+    <div class="cover-tag">Capstone / Thesis — Technical Documentation</div>
+    <h1>Vehicle Diagnostics Platform<br>with OBD-II Integration</h1>
+    <h2>VDP OBD-II — System Architecture, Data Flow &amp; Diagrams</h2>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><label>Classification</label><span>Technical Reference</span></div>
+      <div class="cover-meta-item"><label>Platform</label><span>Multi-platform (.NET)</span></div>
+      <div class="cover-meta-item"><label>Database</label><span>SQL Server — VDPDB (13 Tables)</span></div>
+      <div class="cover-meta-item"><label>Diagrams</label><span>16 Mermaid Diagrams</span></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div id="overview" class="section">
+      <div class="section-header">
+        <span class="section-num">§0</span>
+        <span class="section-title">Project Overview</span>
+      </div>
+      <p class="section-desc">VDP OBD-II is a multi-platform vehicle diagnostics and environmental monitoring system. It integrates Arduino-based environmental sensors, OBD-II ELM327 vehicle diagnostics, a local AI diagnostic engine, and a real-time web dashboard into a unified platform.</p>
+
+      <div class="toc-grid">
+        <a href="#s1" class="toc-item"><span class="toc-num">01</span> System Architecture Diagram</a>
+        <a href="#s2" class="toc-item"><span class="toc-num">02</span> Level 0 DFD — Context Diagram</a>
+        <a href="#s3" class="toc-item"><span class="toc-num">03</span> Level 1 DFD — Major Processes</a>
+        <a href="#s4" class="toc-item"><span class="toc-num">04</span> Level 2 DFD — OBD-II Acquisition</a>
+        <a href="#s5" class="toc-item"><span class="toc-num">05</span> Entity Relationship Diagram</a>
+        <a href="#s6" class="toc-item"><span class="toc-num">06</span> Sequence — OBD-II Connection</a>
+        <a href="#s7" class="toc-item"><span class="toc-num">07</span> Sequence — AI Diagnostics Chat</a>
+        <a href="#s8" class="toc-item"><span class="toc-num">08</span> Sequence — Login / IP Protection</a>
+        <a href="#s9" class="toc-item"><span class="toc-num">09</span> Activity — Arduino Processing</a>
+        <a href="#s10" class="toc-item"><span class="toc-num">10</span> Activity — VIN Decode</a>
+        <a href="#s11" class="toc-item"><span class="toc-num">11</span> Use Case Diagram</a>
+        <a href="#s12" class="toc-item"><span class="toc-num">12</span> Component Diagram</a>
+        <a href="#s13" class="toc-item"><span class="toc-num">13</span> Deployment Diagram</a>
+        <a href="#s14" class="toc-item"><span class="toc-num">14</span> Flowchart — OBD-II Polling</a>
+        <a href="#s15" class="toc-item"><span class="toc-num">15</span> Flowchart — DTC Read/Clear</a>
+        <a href="#s16" class="toc-item"><span class="toc-num">16</span> Flowchart — Sensor Pipeline</a>
+      </div>
+
+      <table>
+        <thead><tr><th>Project</th><th>Type</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>VDP.BL</code></td><td>Class Library</td><td>Business Logic, Entity Models, Data Access (EF6, Active Record pattern)</td></tr>
+          <tr><td><code>VDP.Common</code></td><td>Class Library</td><td>Shared utilities — Crypto, Kendo Grid helpers, NLog, Email</td></tr>
+          <tr><td><code>VDP.WebUI</code></td><td>ASP.NET MVC 5</td><td>Web dashboard — Bootstrap 5, Kendo UI, amCharts5, MapboxGL, SignalR</td></tr>
+          <tr><td><code>VDP.WebAPI</code></td><td>ASP.NET Web API 2</td><td>REST API scaffold</td></tr>
+          <tr><td><code>VDP.WebSession</code></td><td>Class Library</td><td>Session management — FormsAuth cookie parsing</td></tr>
+          <tr><td><code>VDP.WinFormUI</code></td><td>WinForms</td><td>Desktop hardware connector — Serial/TCP to Arduino or ELM327</td></tr>
+          <tr><td><code>VDP.OBDSimulator</code></td><td>WinForms</td><td>Desktop TCP server simulating ELM327 adapter — 60+ PH vehicles</td></tr>
+          <tr><td><code>VDP.ConsoleTest</code></td><td>Console App</td><td>Testing utility</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- DIAGRAM 1 -->
+    <div id="s1" class="section">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <span class="section-title">System Architecture Diagram</span>
+      </div>
+      <p class="section-desc">High-level view of all platform components and their interconnections across hardware, desktop, server, and AI layers.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">System Architecture — All Components</span>
+          <span class="diagram-card-type">flowchart TB</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+graph TB
+    subgraph HW["Hardware Layer"]
+        ARD["Arduino Sensor Node\n(CO / GAS / AIR / Noise)"]
+        ELM["ELM327 OBD-II Adapter\n(Bluetooth / Serial)"]
+        VEH["Vehicle ECU\n(OBD-II Port)"]
+    end
+
+    subgraph DESKTOP["Desktop Layer — .NET Framework"]
+        WIN["VDP.WinFormUI\nHardware Connector\n(3 Modes: Arduino / OBD-II / Simulation)"]
+        DSIM["VDP.OBDSimulator\nDesktop TCP Server\n(60+ PH Vehicles)"]
+    end
+
+    subgraph SERVER["Server Layer — IIS / ASP.NET"]
+        direction TB
+        WEBUI["VDP.WebUI\nASP.NET MVC 5\nWeb Dashboard"]
+        WEBAPI["VDP.WebAPI\nASP.NET Web API 2\nREST Endpoints"]
+        BL["VDP.BL\nBusiness Logic\nEntity Framework 6"]
+        COMMON["VDP.Common\nUtilities — Crypto, Logging, Email"]
+        SESSION["VDP.WebSession\nFormsAuth Session"]
+    end
+
+    subgraph DATA["Data Layer"]
+        DB[("SQL Server\nVDPDB\n13 Tables")]
+    end
+
+    subgraph AI["AI Layer — Local"]
+        LLM["CodeProject.AI\nLlamaChat Module\nlocalhost:32168"]
+    end
+
+    subgraph EXT["External APIs"]
+        NHTSA["NHTSA VIN API\nvpic.nhtsa.dot.gov"]
+        WIKI["Wikipedia\nCar Images"]
+    end
+
+    ELM -->|"Serial / Bluetooth"| VEH
+    ARD -->|"Serial COM Port"| WIN
+    ELM -->|"Serial COM Port"| WIN
+    DSIM -->|"TCP Socket\nport 35000"| WIN
+
+    WIN -->|"Entity Framework 6\nActive Record"| BL
+    BL --> DB
+    WEBUI --> BL
+    WEBAPI --> BL
+    WEBUI --> SESSION
+    WEBUI -->|"HTTP POST\nStreaming Poll"| LLM
+    WIN -->|"NHTSA REST API"| NHTSA
+    WIN -->|"Wikipedia API"| WIKI
+    WEBUI -->|"SignalR\nReal-time Push"| BROWSER["Browser Client"]
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 1 — End-to-end system architecture spanning hardware sensors, desktop connectors, server-side MVC/API, SQL Server data layer, and local AI inference.</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 2 -->
+    <div id="s2" class="section">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <span class="section-title">Level 0 Data Flow Diagram — Context Diagram</span>
+      </div>
+      <p class="section-desc">The context diagram identifies all external entities that interact with the VDP OBD-II system and the primary data exchanges at the system boundary.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">DFD Level 0 — Context / System Boundary</span>
+          <span class="diagram-card-type">flowchart LR</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+flowchart LR
+    ADMIN(["Administrator"])
+    USER(["System User"])
+    ARD(["Arduino\nSensor Hardware"])
+    ELM(["ELM327\nOBD-II Adapter"])
+    DSIM(["Desktop OBD\nSimulator"])
+    NHTSA(["NHTSA\nVIN API"])
+    AI(["CodeProject.AI\nLocal LLM"])
+
+    SYS["VDP OBD-II\nSystem"]
+
+    ARD -->|"Raw sensor data\n(CO, GAS, AIR, Noise)"| SYS
+    ELM -->|"OBD-II PID responses\n& DTC codes"| SYS
+    DSIM -->|"Simulated ELM327\nTCP responses"| SYS
+    NHTSA -->|"Decoded vehicle info\n(Make, Model, Year)"| SYS
+    AI -->|"Diagnostic analysis\nstreaming response"| SYS
+
+    SYS -->|"Sensor readings\nalerts, dashboards"| USER
+    SYS -->|"Admin panels\nuser management"| ADMIN
+    SYS -->|"VIN decode request"| NHTSA
+    SYS -->|"Diagnostics query\n+ context data"| AI
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 2 — Level 0 DFD showing all external entities and their data exchanges with the VDP OBD-II system boundary.</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 3 -->
+    <div id="s3" class="section">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <span class="section-title">Level 1 Data Flow Diagram — Major Processes</span>
+      </div>
+      <p class="section-desc">Decomposition of the system into five major functional processes with their data stores and inter-process flows.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">DFD Level 1 — Authentication, Monitoring, OBD Diagnostics, AI, Device Management</span>
+          <span class="diagram-card-type">flowchart TB</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+flowchart TB
+    ADMIN(["Administrator"])
+    USER(["User"])
+    ARD(["Arduino Sensors"])
+    ELM(["ELM327 / Simulator"])
+    NHTSA(["NHTSA API"])
+    Cpai(["CodeProject.AI"])
+
+    P1["P1\nAuthentication\n& Authorization"]
+    P2["P2\nEnvironmental\nSensor Monitoring"]
+    P3["P3\nOBD-II Vehicle\nDiagnostics"]
+    P4["P4\nAI Diagnostic\nAnalysis"]
+    P5["P5\nDevice &\nUser Management"]
+
+    DS1[("DS1\nUsers &\nSessions")]
+    DS2[("DS2\nVDP Devices\n& Readings")]
+    DS3[("DS3\nOBD Vehicles\n& Readings")]
+    DS4[("DS4\nDTC Records")]
+
+    USER -->|"Credentials"| P1
+    ADMIN -->|"Admin credentials"| P1
+    P1 <-->|"Read / write\nuser & session data"| DS1
+    P1 -->|"Auth token, role"| USER
+    P1 -->|"Auth token, role"| ADMIN
+
+    ARD -->|"Serial raw data"| P2
+    P2 <-->|"Store / retrieve\nreadings & devices"| DS2
+    P2 -->|"Live readings,\nalerts, charts"| USER
+
+    ELM -->|"PID / DTC responses"| P3
+    NHTSA -->|"VIN decode data"| P3
+    P3 <-->|"Store / retrieve\nvehicle data"| DS3
+    P3 <-->|"Store / clear DTCs"| DS4
+    P3 -->|"Vehicle dashboard,\nreadings, DTCs"| USER
+
+    DS2 -->|"Sensor context"| P4
+    DS3 -->|"OBD context"| P4
+    P4 <-->|"Query / response"| Cpai
+    P4 -->|"AI analysis report"| USER
+
+    ADMIN -->|"Device/user CRUD"| P5
+    P5 <-->|"Update devices"| DS2
+    P5 <-->|"Update users"| DS1
+    P5 -->|"Management dashboard"| ADMIN
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 3 — Level 1 DFD showing five major processes: Authentication (P1), Environmental Monitoring (P2), OBD Diagnostics (P3), AI Analysis (P4), and Device Management (P5).</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 4 -->
+    <div id="s4" class="section">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <span class="section-title">Level 2 Data Flow Diagram — OBD-II Data Acquisition</span>
+      </div>
+      <p class="section-desc">Detailed decomposition of the OBD-II data acquisition process (P3) into its constituent sub-processes.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">DFD Level 2 — OBD-II Acquisition Sub-Processes</span>
+          <span class="diagram-card-type">flowchart TB</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+flowchart TB
+    ELM(["ELM327 / Simulator"])
+    NHTSA(["NHTSA VIN API"])
+    WIKI(["Wikipedia API"])
+    USER(["User"])
+
+    P31["P3.1\nELM327 Initialization\n(ATZ, ATE0, ATSP0...)"]
+    P32["P3.2\nVIN Retrieval\n(Mode 09 PID 02)"]
+    P33["P3.3\nVehicle Registration\n& VIN Decode"]
+    P34["P3.4\nPID Polling\n(17 PIDs every 2s)"]
+    P35["P3.5\nResponse Parsing\n& Conversion"]
+    P36["P3.6\nDTC Read / Clear\n(Mode 03/07/0A/04)"]
+    P37["P3.7\nData Persistence\n& Web Sync"]
+
+    DS31[("OBDVehicles")]
+    DS32[("OBDParsedReadings")]
+    DS33[("OBDRawReadings")]
+    DS34[("OBDDTCs")]
+
+    ELM -->|"AT command ACK"| P31
+    P31 -->|"Init complete"| P32
+    P32 -->|"Raw VIN string"| P33
+    NHTSA -->|"Decoded vehicle metadata"| P33
+    WIKI -->|"Car image URL"| P33
+    P33 <-->|"Register / lookup vehicle"| DS31
+    P33 -->|"Vehicle registered"| P34
+
+    ELM -->|"PID hex responses"| P34
+    P34 -->|"Raw command / response"| DS33
+    P34 -->|"Raw bytes"| P35
+    P35 -->|"Parsed metric values"| DS32
+    P35 -->|"Parsed readings"| P37
+
+    ELM -->|"DTC hex frames"| P36
+    P36 <-->|"Store / clear DTC records"| DS34
+    P36 -->|"DTC results"| P37
+
+    P37 -->|"Live dashboard,\ncharts, alerts"| USER
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 4 — Level 2 DFD detailing OBD-II acquisition sub-processes from ELM327 initialization through PID polling, response parsing, DTC handling, and web synchronization.</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 5 -->
+    <div id="s5" class="section">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <span class="section-title">Entity Relationship Diagram</span>
+      </div>
+      <p class="section-desc">Complete ERD for the VDPDB SQL Server database covering all 13 tables across the User/Auth, Environmental Sensor, and OBD-II Vehicle domains.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">ERD — VDPDB (13 Tables)</span>
+          <span class="diagram-card-type">erDiagram</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+erDiagram
+    UserRoles {
+        int UserRoleId PK
+        string UserRoleName
+        datetime CreatedDate
+        datetime UpdatedDate
+    }
+    Users {
+        int UserId PK
+        string Username
+        string Password
+        string FirstName
+        string LastName
+        int UserRoleId FK
+        string MobileNo
+        string Email
+        string ProfileImage
+        guid ResetPasswordGuid
+        datetime ResetPasswordExpiry
+        bool IsActive
+        datetime CreatedDate
+    }
+    IPAddresses {
+        int IPAddressId PK
+        string Address
+        bool IsBlock
+        datetime CreatedDate
+    }
+    InvalidLoginAttempts {
+        int InvalidLoginAttemptId PK
+        int IPAddressId FK
+        datetime LoggedInDate
+    }
+    UserSessions {
+        int UserSessionId PK
+        int UserId FK
+        string IPAddress
+        string SessionId
+        string DeviceInfo
+        datetime LoginDate
+        bool IsLoggedIn
+    }
+    SMSVerificationCodes {
+        int SMSVerificationCodeId PK
+        string MobileNo
+        string VerificationCode
+        string Email
+        datetime CreatedDate
+    }
+    VDPDevices {
+        int VDPDeviceId PK
+        string DeviceName
+        string LocationName
+        string PortNumber
+        int BaudRate
+        double COWarningLimit
+        double CODangerLimit
+        double GasWarningLimit
+        double GasDangerLimit
+        double AirWarningLimit
+        double AirDangerLimit
+        double Latitude
+        double Longitude
+        bool IsDeviceActive
+        datetime LastReceivedMessageDateTime
+    }
+    VDPRawReadings {
+        int VDPRawReadingId PK
+        string DataLine
+        string ReceiverName
+        datetime CreatedDateTime
+    }
+    VDPParsedReadings {
+        int VDPParsedReadingId PK
+        string DeviceName
+        double CO
+        double GAS
+        double AIR
+        int NoiseLevel
+        string NoiseState
+        bool NoiseDetected
+        bool CODigitalOut
+        bool GasDigitalOut
+        bool AirDigitalOut
+        string COStatus
+        string GasStatus
+        string AirStatus
+        string ReceiverName
+        datetime CreatedDateTime
+    }
+    OBDVehicles {
+        int OBDVehicleId PK
+        string VIN
+        string Make
+        string Model
+        int Year
+        string BodyType
+        string EngineSize
+        string FuelType
+        string DriveType
+        string Transmission
+        string PlantCountry
+        string PlateNumber
+        string Color
+        string OwnerName
+    }
+    OBDParsedReadings {
+        int OBDParsedReadingId PK
+        int OBDVehicleId FK
+        double RPM
+        double Speed
+        double EngineLoad
+        double CoolantTemp
+        double IntakeAirTemp
+        double ThrottlePosition
+        double MAPSensor
+        double MAFSensor
+        double ShortTermFuelTrim
+        double LongTermFuelTrim
+        double TimingAdvance
+        double BatteryVoltage
+        double O2Voltage
+        string FuelSystemStatus
+        string MonitorStatus
+        datetime CreatedDateTime
+    }
+    OBDRawReadings {
+        int OBDRawReadingId PK
+        int OBDVehicleId FK
+        string Command
+        string Response
+        string ReceiverName
+        datetime CreatedDateTime
+    }
+    OBDDTCs {
+        int OBDDTCId PK
+        int OBDVehicleId FK
+        string Code
+        string Description
+        string DTCType
+        bool IsCleared
+        datetime ClearedDateTime
+    }
+
+    UserRoles ||--o{ Users : "has"
+    Users ||--o{ UserSessions : "creates"
+    IPAddresses ||--o{ InvalidLoginAttempts : "logs"
+    OBDVehicles ||--o{ OBDParsedReadings : "records"
+    OBDVehicles ||--o{ OBDRawReadings : "logs"
+    OBDVehicles ||--o{ OBDDTCs : "has"
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 5 — Entity Relationship Diagram for VDPDB. Three domain clusters: User/Auth (6 tables), Environmental Sensor (3 tables), OBD-II Vehicle (4 tables).</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 6 -->
+    <div id="s6" class="section">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <span class="section-title">Sequence Diagram — OBD-II Connection &amp; Data Poll</span>
+      </div>
+      <p class="section-desc">Illustrates the full lifecycle of an OBD-II session: ELM327 initialization, VIN retrieval, NHTSA decoding, cyclic PID polling, and data persistence.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">OBD-II Connection, VIN Decode, and PID Polling Sequence</span>
+          <span class="diagram-card-type">sequenceDiagram</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+sequenceDiagram
+    participant WF as VDP.WinFormUI
+    participant ELM as ELM327 Adapter
+    participant NHTSA as NHTSA VIN API
+    participant BL as VDP.BL (EF6)
+    participant DB as SQL Server
+    participant WEB as VDP.WebUI
+
+    Note over WF,ELM: Phase 1 — ELM327 Initialization
+    WF->>ELM: ATZ (Reset)
+    ELM-->>WF: ELM327 v1.5
+    WF->>ELM: ATE0 (Echo Off)
+    ELM-->>WF: OK
+    WF->>ELM: ATL0 (Linefeeds Off)
+    ELM-->>WF: OK
+    WF->>ELM: ATSP0 (Auto Protocol)
+    ELM-->>WF: OK
+    WF->>ELM: ATH0 (Headers Off)
+    ELM-->>WF: OK
+    WF->>ELM: ATAT1 (Adaptive Timing)
+    ELM-->>WF: OK
+
+    Note over WF,DB: Phase 2 — VIN Retrieval & Vehicle Registration
+    WF->>ELM: 0902 (Mode 09 PID 02 — VIN)
+    ELM-->>WF: 49 02 01 ... (VIN bytes)
+    WF->>NHTSA: GET /DecodeVin/{VIN}
+    NHTSA-->>WF: Make, Model, Year, Body, Engine...
+    WF->>BL: RegisterOrUpdateVehicle(VIN, metadata)
+    BL->>DB: INSERT / UPDATE OBDVehicles
+    DB-->>BL: OBDVehicleId
+    BL-->>WF: Vehicle entity
+
+    Note over WF,WEB: Phase 3 — Cyclic PID Polling (every 2 seconds)
+    loop Poll 17 PIDs
+        WF->>ELM: 010C (RPM)
+        ELM-->>WF: 41 0C xx xx
+        WF->>ELM: 010D (Speed)
+        ELM-->>WF: 41 0D xx
+        WF->>ELM: 0105 (Coolant Temp)
+        ELM-->>WF: 41 05 xx
+        Note right of WF: (14 additional PIDs polled)
+        WF->>BL: SaveOBDRawReading(command, response)
+        BL->>DB: INSERT OBDRawReadings
+        WF->>BL: SaveOBDParsedReading(metrics)
+        BL->>DB: INSERT OBDParsedReadings
+    end
+
+    WEB->>BL: GetLatestReadings(vehicleId)
+    BL->>DB: SELECT OBDParsedReadings
+    DB-->>BL: Latest readings
+    BL-->>WEB: Reading DTOs
+    WEB-->>WEB: Render amCharts5 dashboard
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 6 — OBD-II connection sequence covering three phases: ELM327 AT initialization, VIN-based vehicle registration via NHTSA, and cyclic 17-PID polling with dual raw/parsed storage.</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 7 -->
+    <div id="s7" class="section">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <span class="section-title">Sequence Diagram — AI Diagnostics Chat</span>
+      </div>
+      <p class="section-desc">Shows the flow from user query submission through context assembly, local LLM invocation, streaming poll, and response rendering.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">AI Diagnostics Chat — CodeProject.AI Streaming Flow</span>
+          <span class="diagram-card-type">sequenceDiagram</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+sequenceDiagram
+    participant USER as Browser
+    participant MVC as VDP.WebUI (MVC)
+    participant BL as VDP.BL
+    participant DB as SQL Server
+    participant AI as CodeProject.AI (LlamaChat)
+
+    USER->>MVC: POST /AIDiagnostics/Chat\n{query, vehicleId, includeOBD, includeVDP}
+    MVC->>BL: GetLatestOBDReading(vehicleId)
+    BL->>DB: SELECT OBDParsedReadings (latest)
+    DB-->>BL: Reading row
+    BL-->>MVC: OBD metrics DTO
+
+    alt includeVDP = true
+        MVC->>BL: GetLatestVDPReadings()
+        BL->>DB: SELECT VDPParsedReadings (recent)
+        DB-->>BL: Sensor readings
+        BL-->>MVC: Sensor data DTO
+    end
+
+    Note over MVC,AI: Assemble system prompt with sensor context
+    MVC->>AI: POST /v1/text/chat\n{system_prompt, user_message, commandId}
+    AI-->>MVC: {commandId: "cmd_xyz", status: "started"}
+
+    Note over MVC,USER: Streaming poll — 500ms interval, max 180 attempts
+    loop Poll for completion
+        MVC->>AI: GET /v1/text/chat?commandId=cmd_xyz
+        alt Response in progress
+            AI-->>MVC: {partial: true, text: "..."}
+            MVC-->>USER: SSE / partial update
+        else Response complete
+            AI-->>MVC: {partial: false, text: "Full diagnostic analysis..."}
+            MVC-->>USER: Final markdown response
+        end
+    end
+
+    USER->>MVC: Quick Summary request
+    MVC->>AI: POST /v1/text/chat\n{brief_summary_prompt}
+    AI-->>MVC: Short diagnostic summary
+    MVC-->>USER: Dashboard widget update
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 7 — AI Diagnostics Chat sequence. The web controller assembles OBD and/or sensor context, submits to the local LlamaChat module, then polls every 500ms for up to 90 seconds until the streaming response completes.</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 8 -->
+    <div id="s8" class="section">
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <span class="section-title">Sequence Diagram — User Login with IP Protection</span>
+      </div>
+      <p class="section-desc">Covers the complete authentication flow including IP lookup, brute-force attempt counting, account lockout, FormsAuth cookie issuance, and session tracking.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">Login with IP Brute-Force Protection & FormsAuthentication</span>
+          <span class="diagram-card-type">sequenceDiagram</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+sequenceDiagram
+    participant UA as Browser
+    participant MVC as VDP.WebUI
+    participant BL as VDP.BL
+    participant DB as SQL Server
+
+    UA->>MVC: POST /Home/Login\n{username, password}
+    MVC->>BL: GetIPAddress(clientIP)
+    BL->>DB: SELECT IPAddresses WHERE Address = clientIP
+    DB-->>BL: IPAddress record (or null)
+
+    alt IP is blocked
+        BL-->>MVC: IsBlock = true
+        MVC-->>UA: Error — "Access denied from this IP"
+    else IP not blocked
+        BL->>DB: COUNT InvalidLoginAttempts\nWHERE IPAddressId AND last 10 mins
+        DB-->>BL: attemptCount
+
+        alt attemptCount >= 10
+            BL->>DB: UPDATE IPAddresses SET IsBlock = true
+            BL-->>MVC: Threshold exceeded
+            MVC-->>UA: Error — "IP blocked due to repeated failures"
+        else Under threshold
+            BL->>DB: SELECT Users WHERE Username = ?
+            DB-->>BL: User record
+            BL->>BL: DecryptPassword(stored) == submitted?
+
+            alt Credentials invalid
+                BL->>DB: INSERT InvalidLoginAttempts\n(IPAddressId, LoggedInDate)
+                BL-->>MVC: Authentication failed
+                MVC-->>UA: Error — "Invalid username or password"
+            else Credentials valid
+                MVC->>MVC: FormsAuthentication.SetAuthCookie\n(username, persistent)
+                BL->>DB: INSERT UserSessions\n(UserId, IPAddress, SessionId, DeviceInfo, LoginDate, IsLoggedIn=true)
+                DB-->>BL: Session record created
+                BL-->>MVC: Auth success + user role
+                MVC-->>UA: Redirect → /Dashboard\n(Auth cookie set)
+            end
+        end
+    end
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 8 — Login sequence with three-layer protection: IP block check, attempt count threshold (10 attempts), and FormsAuthentication cookie issuance upon successful credential verification.</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 9 -->
+    <div id="s9" class="section">
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <span class="section-title">Activity Diagram — Arduino Environmental Sensor Processing</span>
+      </div>
+      <p class="section-desc">End-to-end activity flow from serial data reception through parsing, validation, threshold classification, and database persistence.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">Arduino Sensor Data Processing Activity</span>
+          <span class="diagram-card-type">flowchart TD</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+flowchart TD
+    A([Start — SerialPort DataReceived Event]) --> B[Read raw string from COM port]
+    B --> C{Contains required\nkeyword prefix?\nDEV: CO: GAS: AIR:}
+    C -->|No| D[Log malformed data\nDiscard line]
+    D --> A
+
+    C -->|Yes| E[Save VDPRawReading to DB\nDataLine, ReceiverName, DateTime]
+    E --> F[VDPDataParser.Parse\nSplit on comma, extract key:value pairs]
+    F --> G{All required fields\npresent & numeric?}
+    G -->|No| H[Log parse error\nSkip parsed write]
+    H --> A
+
+    G -->|Yes| I{DeviceName\nexists in VDPDevices?}
+    I -->|No| J[Auto-register new device\nwith default thresholds\nINSERT VDPDevices]
+    I -->|Yes| K[UPDATE VDPDevices\nLastReceivedMessageDateTime = NOW]
+    J --> K
+
+    K --> L[Classify CO status\nNormal / Warning / Danger\nvs device thresholds]
+    L --> M[Classify GAS status]
+    M --> N[Classify AIR status]
+    N --> O[Classify Noise state\nNoisy / Quiet]
+
+    O --> P[INSERT VDPParsedReading\nAll PPM values, statuses, device name]
+    P --> Q[Update WinForms display\nColor-coded: Green/Orange/Red]
+    Q --> R{Any reading in\nDanger status?}
+    R -->|Yes| S[Trigger alert\nLog warning event]
+    S --> A
+    R -->|No| A
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 9 — Arduino sensor processing activity from serial reception through VDPDataParser parsing, device auto-registration, threshold classification (Normal/Warning/Danger), and database persistence.</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 10 -->
+    <div id="s10" class="section">
+      <div class="section-header">
+        <span class="section-num">10</span>
+        <span class="section-title">Activity Diagram — VIN Decoding &amp; Vehicle Registration</span>
+      </div>
+      <p class="section-desc">Activity flow for vehicle identification combining OBD-II Mode 09 VIN retrieval, NHTSA API decoding, image resolution through a three-tier fallback, and database registration.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">VIN Decode & Vehicle Registration Activity</span>
+          <span class="diagram-card-type">flowchart TD</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+flowchart TD
+    A([Start — OBD Connection Established]) --> B[Send Mode 09 PID 02\n'0902' to ELM327]
+    B --> C{Valid VIN\nresponse received?\n17 alphanumeric chars}
+    C -->|No / Timeout| D[Display VIN unavailable\nContinue with PID polling only]
+
+    C -->|Yes| E[Parse hex bytes → ASCII VIN string]
+    E --> F{VIN already\nexists in OBDVehicles?}
+    F -->|Yes| G[Load existing vehicle record\nSkip decode, go to image fetch]
+
+    F -->|No| H[Call NHTSA VIN API\nGET /DecodeVin/VIN]
+    H --> I{NHTSA\nresponse OK?}
+    I -->|No| J[Use partial data\nMake/Model = Unknown]
+    I -->|Yes| K[Extract: Make, Model, Year,\nBodyType, Engine, Fuel,\nDrive, Trans, PlantCountry]
+
+    J --> L[INSERT OBDVehicles\nwith available data]
+    K --> L
+
+    L --> M[VINDecoder — Resolve car image]
+    G --> M
+
+    M --> N{Image in\nlocal CarImages\nfolder?}
+    N -->|Yes| O[Load local image file]
+    N -->|No| P[Call Wikipedia API\nSearch Make + Model]
+    P --> Q{Wikipedia\nimage found?}
+    Q -->|Yes| R[Download & cache image]
+    Q -->|No| S[CarSilhouetteRenderer\nGenerate SVG silhouette\nbased on BodyType]
+
+    O --> T[Display in VehicleInfoPanel\nPictureBox]
+    R --> T
+    S --> T
+
+    T --> U[Show vehicle info card\nVIN, decoded fields, editable:\nPlate, Color, OwnerName]
+    U --> V([Begin PID Polling Cycle])
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 10 — VIN decoding and registration activity. Image resolution uses a three-tier fallback: local file cache, Wikipedia API, then procedurally generated SVG silhouette via CarSilhouetteRenderer.</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 11 -->
+    <div id="s11" class="section">
+      <div class="section-header">
+        <span class="section-num">11</span>
+        <span class="section-title">Use Case Diagram</span>
+      </div>
+      <p class="section-desc">System use cases organized by actor role — Administrator and Standard User.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">Use Case Diagram — Admin vs User Actor Responsibilities</span>
+          <span class="diagram-card-type">flowchart LR</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+flowchart LR
+    ADMIN(["&#128100; Administrator"])
+    USER(["&#128100; System User"])
+
+    subgraph AUTH["Authentication"]
+        UC1["Login to System"]
+        UC2["Reset Password via Email"]
+        UC3["Manage User Accounts"]
+        UC4["Assign User Roles"]
+    end
+
+    subgraph ENVMON["Environmental Monitoring"]
+        UC5["View Live Sensor Dashboard"]
+        UC6["Monitor CO / GAS / AIR Readings"]
+        UC7["Configure Device Thresholds"]
+        UC8["Manage VDP Sensor Devices"]
+        UC9["Export Sensor Readings (CSV)"]
+        UC10["View Raw & Parsed Readings Grid"]
+    end
+
+    subgraph OBDDIAG["OBD-II Diagnostics"]
+        UC11["Connect to ELM327 Adapter"]
+        UC12["Connect to OBD Simulator (TCP)"]
+        UC13["View Live OBD Dashboard"]
+        UC14["Register / View Vehicle Details"]
+        UC15["Read & Clear DTCs"]
+        UC16["View Historical OBD Charts"]
+        UC17["Export OBD Readings (CSV)"]
+    end
+
+    subgraph AIDX["AI Diagnostics"]
+        UC18["Submit Diagnostic Query"]
+        UC19["Include OBD Context in Query"]
+        UC20["Include Sensor Context in Query"]
+        UC21["View Quick Summary Widget"]
+    end
+
+    subgraph ADMIN_UC["Administration"]
+        UC22["Manage IP Block List"]
+        UC23["View Session Logs"]
+        UC24["Configure System Settings"]
+    end
+
+    ADMIN --> UC1
+    ADMIN --> UC3
+    ADMIN --> UC4
+    ADMIN --> UC7
+    ADMIN --> UC8
+    ADMIN --> UC22
+    ADMIN --> UC23
+    ADMIN --> UC24
+
+    USER --> UC1
+    USER --> UC2
+    USER --> UC5
+    USER --> UC6
+    USER --> UC9
+    USER --> UC10
+    USER --> UC11
+    USER --> UC12
+    USER --> UC13
+    USER --> UC14
+    USER --> UC15
+    USER --> UC16
+    USER --> UC17
+    USER --> UC18
+    USER --> UC19
+    USER --> UC20
+    USER --> UC21
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 11 — Use case diagram showing Administrator and User actors across Authentication, Environmental Monitoring, OBD-II Diagnostics, AI Diagnostics, and Administration domains.</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 12 -->
+    <div id="s12" class="section">
+      <div class="section-header">
+        <span class="section-num">12</span>
+        <span class="section-title">Component Diagram</span>
+      </div>
+      <p class="section-desc">Logical component view of all eight C# projects with their dependency relationships.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">Component Diagram — 8 C# Projects</span>
+          <span class="diagram-card-type">flowchart TB</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+flowchart TB
+    subgraph SHARED["Shared Libraries"]
+        BL["&#9632; VDP.BL\nBusiness Logic\nEntity Models\nEntity Framework 6\nActive Record Pattern"]
+        COMMON["&#9632; VDP.Common\nCrypto Utilities\nNLog Logging\nEmail Service\nKendo Grid Helpers"]
+        SESSION["&#9632; VDP.WebSession\nFormsAuth\nCookie Parsing\nSession Abstraction"]
+    end
+
+    subgraph WEB["Web Tier — IIS"]
+        WEBUI["&#9632; VDP.WebUI\nASP.NET MVC 5\nBootstrap 5\nKendo UI Grids\namCharts5\nMapboxGL\nSignalR Hub"]
+        WEBAPI["&#9632; VDP.WebAPI\nASP.NET Web API 2\nREST Endpoints\napi/controller/id"]
+    end
+
+    subgraph DESKTOP["Desktop Tier — .NET Framework"]
+        WIN["&#9632; VDP.WinFormUI\nHardware Connector\nMode 1: Arduino Serial\nMode 2: ELM327 Serial\nMode 3: TCP Simulation\nOBDDashboardPanel\nVehicleInfoPanel\nVINDecoder"]
+        SIM["&#9632; VDP.OBDSimulator\nELM327 TCP Server\n60+ PH Vehicles\nRandom Walk Engine\nDTC Injection"]
+        CON["&#9632; VDP.ConsoleTest\nTesting Utility"]
+    end
+
+    subgraph DATA["Data Tier"]
+        DB[("&#9642; SQL Server\nVDPDB\n13 Tables")]
+        EF["Entity Framework 6\nCode First / DB First"]
+    end
+
+    WEBUI --> BL
+    WEBUI --> COMMON
+    WEBUI --> SESSION
+    WEBAPI --> BL
+    WEBAPI --> COMMON
+    WIN --> BL
+    WIN --> COMMON
+    SIM --> COMMON
+    CON --> BL
+    CON --> COMMON
+
+    BL --> EF
+    EF --> DB
+
+    WIN -.->|"TCP Socket"| SIM
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 12 — Component diagram. VDP.BL and VDP.Common are shared by all consumers. VDP.WinFormUI communicates with the desktop simulator via TCP socket. Solid arrows indicate compile-time references; dashed arrows indicate runtime TCP connections.</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 13 -->
+    <div id="s13" class="section">
+      <div class="section-header">
+        <span class="section-num">13</span>
+        <span class="section-title">Deployment Diagram</span>
+      </div>
+      <p class="section-desc">Physical deployment topology showing nodes, execution environments, and communication protocols across all hardware and software layers.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">Deployment Diagram — Physical Node Topology</span>
+          <span class="diagram-card-type">flowchart TB</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+flowchart TB
+    subgraph HW_NODE["Hardware Nodes"]
+        ARD_NODE["&#9642; Arduino Microcontroller\n&#9675; MQ-7 CO Sensor\n&#9675; MQ-9 Gas Sensor\n&#9675; MQ-135 Air Sensor\n&#9675; Sound Level Sensor\nProtocol: Serial UART 9600 baud"]
+        ELM_NODE["&#9642; ELM327 OBD-II Adapter\n&#9675; Bluetooth / Serial COM\n&#9675; ISO 15765-4 CAN\nConnects to vehicle OBD-II port"]
+    end
+
+    subgraph DESKTOP_NODE["Desktop PC — Windows"]
+        WIN_ENV["&#9642; .NET Framework Runtime\n&#9675; VDP.WinFormUI.exe\n&#9675; SerialPort listener\n&#9675; TCP client (mode 3)"]
+        SIM_ENV["&#9642; .NET Framework Runtime\n&#9675; VDP.OBDSimulator.exe\n&#9675; TCP server :35000\n&#9675; localhost binding"]
+        AI_ENV["&#9642; CodeProject.AI Server\n&#9675; LlamaChat Module\n&#9675; HTTP :32168\n&#9675; Local inference only"]
+    end
+
+    subgraph SERVER_NODE["Application Server — Windows IIS"]
+        IIS["&#9642; IIS Web Server\n&#9675; VDP.WebUI (MVC 5)\n&#9675; VDP.WebAPI (Web API 2)\n&#9675; SignalR Hub\nPort 80 / 443"]
+        SQLSRV["&#9642; SQL Server Instance\n&#9675; VDPDB Database\n&#9675; 13 Tables\nNamed instance or LocalDB"]
+    end
+
+    subgraph CLIENT_NODE["Client Browser"]
+        BROWSER["&#9642; Web Browser\n&#9675; Bootstrap 5 + Kendo UI\n&#9675; amCharts5 + MapboxGL\n&#9675; SignalR WebSocket"]
+    end
+
+    subgraph EXT_NODE["External Services"]
+        NHTSA_SVC["&#9642; NHTSA VIN API\nvpic.nhtsa.dot.gov\nHTTPS REST"]
+        WIKI_SVC["&#9642; Wikipedia API\nHTTPS REST\nCar images"]
+    end
+
+    ARD_NODE -->|"Serial COM\n9600 baud"| WIN_ENV
+    ELM_NODE -->|"Bluetooth\nSerial COM"| WIN_ENV
+    SIM_ENV -->|"TCP :35000\nlocalhost"| WIN_ENV
+
+    WIN_ENV -->|"SQL / EF6"| SQLSRV
+    IIS -->|"SQL / EF6"| SQLSRV
+    IIS -->|"HTTP :32168"| AI_ENV
+    WIN_ENV -->|"HTTPS"| NHTSA_SVC
+    WIN_ENV -->|"HTTPS"| WIKI_SVC
+
+    BROWSER -->|"HTTP/HTTPS\nWebSocket"| IIS
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 13 — Physical deployment topology. The desktop PC hosts three runtimes concurrently: VDP.WinFormUI, VDP.OBDSimulator, and CodeProject.AI. The IIS server and SQL Server may share the same machine in a local deployment.</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 14 -->
+    <div id="s14" class="section">
+      <div class="section-header">
+        <span class="section-num">14</span>
+        <span class="section-title">Flowchart — Complete OBD-II Polling Cycle</span>
+      </div>
+      <p class="section-desc">Detailed flowchart of the complete ELM327 polling loop: initialization guard, 17-PID sequence, response parsing formula application, storage, dashboard update, and cycle repeat.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">OBD-II Polling Cycle — Init → Poll → Parse → Save → Display → Repeat</span>
+          <span class="diagram-card-type">flowchart TD</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+flowchart TD
+    A([Start]) --> B{ELM327\nInitialized?}
+    B -->|No| C[Send AT commands\nATZ ATE0 ATL0\nATSP0 ATH0 ATAT1]
+    C --> D{All AT commands\nreturned OK?}
+    D -->|No| E[Display error\nRetry or abort]
+    D -->|Yes| F[Mark as initialized\nBegin VIN retrieval]
+    F --> G[Mode 09 PID 02 → VIN decode]
+    G --> H[Vehicle registered in DB]
+
+    B -->|Yes| I[Start poll timer\n2 second interval]
+    H --> I
+
+    I --> J["Poll PID 010C → RPM\nFormula: ((A×256)+B)/4"]
+    J --> K["Poll PID 010D → Speed\nFormula: A km/h"]
+    K --> L["Poll PID 0104 → Engine Load\nFormula: A×100/255 %"]
+    L --> M["Poll PID 0105 → Coolant Temp\nFormula: A − 40 °C"]
+    M --> N["Poll PID 010F → Intake Air\nFormula: A − 40 °C"]
+    N --> O["Poll PID 010E → Timing Advance\nFormula: A/2 − 64 °"]
+    O --> P["Poll PID 0111 → Throttle\nFormula: A×100/255 %"]
+    P --> Q["Poll PID 010B → MAP Sensor\nFormula: A kPa"]
+    Q --> R["Poll PID 0110 → MAF\nFormula: ((A×256)+B)/100 g/s"]
+    R --> S["Poll PID 0106/0107 → STFT/LTFT\nFormula: (A−128)×100/128 %"]
+    S --> T["Poll PID 0103 → Fuel System Status"]
+    T --> U["Poll PID 0114 → O2 Sensor Voltage\nFormula: A/200 V"]
+    U --> V["Poll PID 0142 → Battery Voltage\nFormula: ((A×256)+B)/1000 V"]
+    V --> W["Poll PID 011C → OBD Standard"]
+    W --> X["Poll PID 011F → Run Time\nFormula: (A×256)+B seconds"]
+    X --> Y["Poll PID 0101 → Monitor Status / CEL bit"]
+
+    Y --> Z[For each PID response:\nSave OBDRawReading\ncommand + hex response]
+    Z --> AA[Parse all responses\nApply conversion formulas]
+    AA --> AB[INSERT OBDParsedReading\nAll 17 metric values\n+ OBDVehicleId + DateTime]
+    AB --> AC[Update OBDDashboardPanel\n4 SplineArea charts\n12 metric cards]
+    AC --> AD{Check CEL /\nMonitor Status\nbyte flags}
+    AD -->|"CEL ON or monitors incomplete"| AE[Trigger DTC read\nMode 03/07/0A]
+    AD -->|"All clear"| AF[Wait 2 seconds]
+    AE --> AF
+    AF --> I
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 14 — Complete OBD-II polling cycle. Each of the 17 PIDs is polled sequentially, stored as a raw reading, parsed using the OBD-II standard conversion formula, and persisted as a parsed reading before the dashboard is updated.</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 15 -->
+    <div id="s15" class="section">
+      <div class="section-header">
+        <span class="section-num">15</span>
+        <span class="section-title">Flowchart — DTC Read/Clear Process</span>
+      </div>
+      <p class="section-desc">Complete DTC lifecycle: reading stored, pending, and permanent codes via OBD-II modes 03, 07, and 0A, storing them in OBDDTCs, and the Mode 04 clear sequence with confirmation.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">DTC Read/Clear Flowchart — Mode 03 / 07 / 0A / 04</span>
+          <span class="diagram-card-type">flowchart TD</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+flowchart TD
+    A([Start — DTC Read Triggered]) --> B[Send Mode 03\nStored DTCs]
+    B --> C{Response\ncontains DTC\nframes?}
+    C -->|No / 43 00| D[No stored DTCs — mark clear]
+    C -->|Yes| E[Parse DTC frames\nExtract 5-char codes\nP/B/C/U prefix decode]
+    E --> F[For each DTC:\nCheck if exists in OBDDTCs]
+    F --> G{DTC already\nrecorded?}
+    G -->|Yes| H[Update DTCType = Stored\nKeep existing record]
+    G -->|No| I[INSERT OBDDTCs\nCode, Description, DTCType=Stored\nIsCleared=false]
+
+    D --> J[Send Mode 07\nPending DTCs]
+    H --> J
+    I --> J
+
+    J --> K{Pending DTC\nframes present?}
+    K -->|Yes| L[Parse & upsert\nDTCType = Pending]
+    K -->|No| M[Send Mode 0A\nPermanent DTCs]
+    L --> M
+
+    M --> N{Permanent DTC\nframes present?}
+    N -->|Yes| O[Parse & upsert\nDTCType = Permanent]
+    N -->|No| P[Display DTC list\nin web dashboard\nand WinForms panel]
+    O --> P
+
+    P --> Q{User requests\nDTC clear?}
+    Q -->|No| R([End — DTCs stored])
+    Q -->|Yes| S[Show confirmation dialog\nWarn: clears all stored codes]
+    S --> T{User confirmed\nclear?}
+    T -->|No| R
+    T -->|Yes| U[Send Mode 04\nClear Diagnostic Information]
+    U --> V{ELM327 returns\n'44' OK response?}
+    V -->|No| W[Display clear failure\nLog error]
+    W --> R
+    V -->|Yes| X[UPDATE OBDDTCs\nIsCleared = true\nClearedDateTime = NOW\nWHERE OBDVehicleId AND IsCleared = false]
+    X --> Y[Re-read DTCs via Mode 03\nVerify clear successful]
+    Y --> P
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 15 — DTC read/clear process. Three OBD-II modes are queried sequentially (Mode 03 stored, Mode 07 pending, Mode 0A permanent). The Mode 04 clear requires explicit user confirmation and updates IsCleared/ClearedDateTime on all related OBDDTCs records.</div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM 16 -->
+    <div id="s16" class="section">
+      <div class="section-header">
+        <span class="section-num">16</span>
+        <span class="section-title">Flowchart — Sensor Data Pipeline</span>
+      </div>
+      <p class="section-desc">Complete pipeline from raw serial input through validation, parsing, per-sensor threshold classification, dual-write persistence (raw + parsed), and web dashboard display.</p>
+      <div class="diagram-card">
+        <div class="diagram-card-header">
+          <span class="diagram-card-title">Sensor Data Pipeline — Raw Serial → Web Display</span>
+          <span class="diagram-card-type">flowchart TD</span>
+        </div>
+        <div class="diagram-body">
+          <div class="mermaid">
+flowchart TD
+    A([Arduino Serial Output]) --> B["Raw string received\nDEV:VDP001,CO:4.0,GAS:2.3,\nAIR:230.7,NOISE:923,NS:noisy,\nCOS:normal,GASS:normal,AIRS:normal"]
+    B --> C[SerialPort.DataReceived event\nVDP.WinFormUI]
+    C --> D[Trim whitespace\nCheck non-empty]
+    D --> E{Contains 'DEV:'\nprefix?}
+    E -->|No| F[Discard — not VDP format]
+    F --> A
+    E -->|Yes| G[INSERT VDPRawReadings\nDataLine, ReceiverName, DateTime]
+
+    G --> H[VDPDataParser.Parse\nSplit by comma delimiter\nBuild key:value dictionary]
+    H --> I{All fields valid?\nCO/GAS/AIR are\nnumeric doubles?}
+    I -->|No| J[Log parse failure\nSkip parsed insert]
+    J --> A
+
+    I -->|Yes| K[Lookup device thresholds\nfrom VDPDevices table]
+    K --> L{CO value\nvs thresholds}
+    L -->|"< Warning limit"| L1["COStatus = Normal\nDisplay: Green"]
+    L -->|"Warning ≤ CO < Danger"| L2["COStatus = Warning\nDisplay: Orange"]
+    L -->|">= Danger limit"| L3["COStatus = Danger\nDisplay: Red"]
+
+    L1 --> M{GAS value\nvs thresholds}
+    L2 --> M
+    L3 --> M
+
+    M -->|"< 1000 PPM"| M1["GasStatus = Normal"]
+    M -->|"1000–5000 PPM"| M2["GasStatus = Warning"]
+    M -->|"> 5000 PPM"| M3["GasStatus = Danger"]
+
+    M1 --> N{AIR value\nvs thresholds}
+    M2 --> N
+    M3 --> N
+
+    N -->|"< 200 PPM"| N1["AirStatus = Normal"]
+    N -->|"200–400 PPM"| N2["AirStatus = Warning"]
+    N -->|"> 400 PPM"| N3["AirStatus = Danger"]
+
+    N1 --> O[INSERT VDPParsedReadings\nAll values, statuses, device name]
+    N2 --> O
+    N3 --> O
+
+    O --> P[UPDATE VDPDevices\nLastReceivedMessageDateTime = NOW]
+    P --> Q[WinForms UI update\nColor-coded label panel\nReal-time values]
+    Q --> R{Web Dashboard\npoll interval}
+    R --> S[VDP.WebUI polls\nGET /VDPMonitoring/LiveData]
+    S --> T[BL query: latest VDPParsedReadings\nper active device]
+    T --> U[Render amCharts5\nTime-series graphs\nCO / GAS / AIR over time]
+    U --> V{Any Danger\nstatus active?}
+    V -->|Yes| W[Show alert banner\nDashboard alert list]
+    V -->|No| X[Normal display\nGreen status indicators]
+    W --> A
+    X --> A
+          </div>
+        </div>
+        <div class="diagram-caption">Figure 16 — Sensor data pipeline. Each incoming Arduino string triggers a dual-write (raw + parsed), per-sensor threshold classification against device-configured limits, color-coded WinForms display, and asynchronous web dashboard update via polling.</div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+      <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">VDP OBD-II — Technical Documentation</div>
+      <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">16 Mermaid Diagrams — All Rights Reserved</div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    themeVariables: {
+      primaryColor: '#E8EFF8',
+      primaryTextColor: '#1A1814',
+      primaryBorderColor: '#1B4F8A',
+      lineColor: '#5C5650',
+      secondaryColor: '#F2F0EC',
+      tertiaryColor: '#EAF2ED',
+      background: '#FFFFFF',
+      mainBkg: '#E8EFF8',
+      nodeBorder: '#1B4F8A',
+      clusterBkg: '#F8F7F4',
+      clusterBorder: '#C8C0B5',
+      edgeLabelBackground: '#FFFFFF',
+      fontFamily: 'IBM Plex Sans, sans-serif',
+      fontSize: '13px'
+    },
+    flowchart: { curve: 'basis', htmlLabels: true },
+    sequence: { actorMargin: 80, messageMargin: 40 },
+    er: { diagramPadding: 20 }
+  });
+
+  // Highlight active nav item on scroll
+  const sections = document.querySelectorAll('.section[id]');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 80) current = s.id;
+    });
+    navItems.forEach(n => {
+      n.classList.remove('active');
+      if (n.getAttribute('href') === '#' + current) n.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
